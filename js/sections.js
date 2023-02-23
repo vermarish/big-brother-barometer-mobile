@@ -46,10 +46,6 @@
   var gui_stretch = 30;  // should always be >> 1
   var timeScaleF = null; // TODO refactor timeScaleF to xAtStart
 
-  var timeScaleG = null;
-
-  // given datum's t, compute the tau for when it should enter the viz
-  var t_to_tau_cross = null;
   var tau_to_p = null;
   var t_to_p = null;
   var pressure_to_y = null;
@@ -67,6 +63,8 @@
   var ts_group_height = 100;  // vertical axis length + margin
   var ts_plot_proportion = 0.9;
   var ts_plot_height = ts_plot_proportion*ts_group_height;   // vertical axis length
+  var ts_plot_offset = (ts_group_height - ts_plot_height) / 2;  // margin
+
   var otherViewBoxCoords = " 0 " + width + " " + ts_plot_height;
   var percent_upper_bound = 100*(ts_group_height - ts_plot_height)/(2*ts_group_height);
   var percent_lower_bound = 100*(ts_group_height + ts_plot_height)/(2*ts_group_height);
@@ -79,7 +77,8 @@
     "cy": "50%",
     "r": 20,
     "fill": "red",
-    "opacity": 0.7
+    "opacity": 0.7,
+    "y": 0
   };
   
   var pressureSpec = {
@@ -88,7 +87,8 @@
     "cy": d => pressure_to_y(d.one) + "%",
     "r": 2,
     "fill": "blue",
-    "opacity": 0.8
+    "opacity": 0.8,
+    "y": 120
   };
 
   var gyroscopeOneSpec = {
@@ -97,7 +97,8 @@
     "cy": d => gyroscope_to_y(d.one) + "%",
     "r": 2,
     "fill": "green",
-    "opacity": 0.8
+    "opacity": 0.8,
+    "y": 240
   }
 
   var gyroscopeTwoSpec = {
@@ -106,7 +107,8 @@
     "cy": d => gyroscope_to_y(d.two) + "%",
     "r": 2,
     "fill": "green",
-    "opacity": 0.8
+    "opacity": 0.8,
+    "y": 340
   }
 
   var gyroscopeThreeSpec = {
@@ -115,7 +117,8 @@
     "cy": d => gyroscope_to_y(d.three) + "%",
     "r": 2,
     "fill": "green",
-    "opacity": 0.8
+    "opacity": 0.8,
+    "y": 440
   }
 
   
@@ -165,22 +168,18 @@
       t_close = rawData.t_close[0];
       tau_close = rawData.tau_close[0];
       delta_tau_s = tau_close - tau_open;
-      
+
 
       // build all of our conversion functions using t_open, t_close
       timeScaleF = d3.scaleLinear()  // TODO refactor timeScaleF to xAtStart
       .domain([t_open, t_close])
       .range([width, width*(1+gui_stretch)]);
 
+      /*
       timeScaleG = d3.scaleLinear()
       .domain([t_open, t_close])
       .range([width*(1-gui_stretch), width]);
-
-
-
-      t_to_tau_cross = d3.scaleLinear()
-      .domain([t_open, t_close])
-      .range([tau_open,tau_close]);
+      */
 
       t_to_p = d3.scaleLinear()
       .domain([t_open, t_close])
@@ -285,10 +284,9 @@
     // setup the video listeners
     
     
+    video.addEventListener('seeking', seekToState);
     video.addEventListener('playing', startAnimation);
     video.addEventListener('pause', function() {
-      
-      console.log("pausing?");
       if (video.currentTime == video.duration) {
         video.currentTime = 0;
         setTimeout(function() {video.play()}, 500);
@@ -296,8 +294,6 @@
         stopAnimation();
       }
     });
-    
-    video.addEventListener('seeking', seekToState);
 
     //setup
 
@@ -334,8 +330,6 @@
       // start with a container
       let container = g.append("svg")
         .attr("id", containerName)
-        // .attr('x', width)
-        // .attr('y', height/4)
         .attr("height", ts_group_height)
         .attr('transform', transform)
         .attr('opacity', 0);  // always init with opacity 0, reveal later.
@@ -382,12 +376,12 @@
      * @returns dataContainer
      */
     let plot_time_series_new = function(time_series, spec, 
-      containerName, transform) {
+      containerName) {
         let container = g.append("svg")
           .attr("id", containerName)
-          .attr("transform", transform)
+          .attr("y", spec["y"])
           .attr("height", ts_group_height)
-          .attr("opacity", 1); // FIXME back to 0
+          .attr("opacity", 0);
         
         let axes = container.append("g")
           .attr("class", "axes");
@@ -411,12 +405,15 @@
         
         let viewport = container.append("svg")
           .attr("class", "dataViewPort")
-          .attr("height", ts_plot_height)
+          .attr("y", ts_plot_offset)
+          .attr("height", ts_plot_proportion*100 + "%")
           .attr("width", width)
           .attr("viewBox", "0" + otherViewBoxCoords);
 
         let graph = viewport.append("svg")
-          .attr("height", ts_plot_height)
+          .attr("class", "canvas")
+          .attr("y", (1-ts_plot_proportion)/2 * 100 + "%")
+          .attr("height", "100%")
           .attr("width", width*gui_stretch + width);
         
         graph.selectAll("circle")
@@ -434,11 +431,35 @@
     }
 
     var touch = plot_time_series(touchData, touchSpec, "touchContainer", "translate(0,0)");
-    // plot_time_series(pressureData, pressureSpec, "pressureContainer", "translate(0,120)");
-    var pressure = plot_time_series_new(pressureData, pressureSpec, "pressureContainer", "translate(0,120)");
-    var gyroscopeOne = plot_time_series_new(gyroscopeData, gyroscopeOneSpec, "gyroscopeOneContainer", "translate(0,240)");
-    var gyroscopeTwo = plot_time_series_new(gyroscopeData, gyroscopeTwoSpec, "gyroscopeTwoContainer", "translate(0,340)");
-    var gyroscopeThree = plot_time_series_new(gyroscopeData, gyroscopeThreeSpec, "gyroscopeThreeContainer", "translate(0,440)");
+    var pressure = plot_time_series_new(pressureData, pressureSpec, "pressureContainer");
+    var gyroscopeOne = plot_time_series_new(gyroscopeData, gyroscopeOneSpec, "gyroscopeOneContainer");
+    var gyroscopeTwo = plot_time_series_new(gyroscopeData, gyroscopeTwoSpec, "gyroscopeTwoContainer");
+    var gyroscopeThree = plot_time_series_new(gyroscopeData, gyroscopeThreeSpec, "gyroscopeThreeContainer");
+
+    pressure.select(".dataViewPort").select(".canvas").selectAll("line")
+      .data(pressureData)
+      .enter()
+      .append("line")
+      .attr("id", pressureSpec["id"])
+      .attr("x1", pressureSpec["cx"])
+      .attr("y1", "100%")
+      .attr("x2", pressureSpec["cx"])
+      .attr("y2", pressureSpec["cy"])
+      .attr("stroke", pressureSpec["fill"]);
+    pressure.select(".axes").select(".horizontal-line")
+      .attr("y1", "100%")
+      .attr("y2", "100%");
+    /*
+    cd ..
+    label plots
+    do more text
+    create function for pressure coloring
+    put first linear model
+    ⋮ 
+    table of contents
+    ⋮
+    n. make lines
+    */
   };
 
   /**
@@ -573,6 +594,7 @@
       "#gyroscopeTwoContainer", "#gyroscopeThreeContainer"]) {
       g.select(series)
         .select(".dataViewPort")
+        .interrupt()
         .transition()
         .attrTween("viewBox", function() {
           return d3.interpolateString(this.getAttribute("viewBox"), viewBoxXMin(tauCurr) + otherViewBoxCoords);
@@ -612,9 +634,8 @@
     var tau_to = tau_close;
     var p_close = p_tau(tau_close);
 
-    // TODO encapsulate all this in a function that returns an array of these selections
-    var touches = g.select("#touchContainer").select(".data").selectAll("*");
     
+    var touches = g.select("#touchContainer").select(".data").selectAll("*");
     
     for (const series of [touches]) {
       // then bring each to the x_width when it's their turn to be revealed
@@ -643,6 +664,7 @@
       "#gyroscopeTwoContainer", "#gyroscopeThreeContainer"]) {
       g.select(series)
         .select(".dataViewPort")
+        .interrupt()
         .transition()
         .ease(d3.easeLinear)
         .attrTween("viewBox", function() {
