@@ -10,7 +10,7 @@
   // and margins of the vis area.
   var width = 600;
   var height = 520;
-  var margin = { top: 10, left: 50, bottom: 30, right: 50 };
+  var margin = { top: 10, left: 50, bottom: 30, right: 150 };
 
   // Keep track of which visualization
   // we are on and which was the last
@@ -68,9 +68,8 @@
   var ts_plot_proportion = 0.8;
   var ts_plot_height = ts_plot_proportion*ts_group_height;   // vertical axis length
 
-  var otherViewBoxCoords = " 0 " + width + " " + ts_plot_height;
-  var percent_upper_bound = 100*(ts_group_height - ts_plot_height)/(2*ts_group_height);
-  var percent_lower_bound = 100*(ts_group_height + ts_plot_height)/(2*ts_group_height);
+  var percent_upper_bound = 100*(ts_group_height - ts_plot_height)/(2*ts_group_height) + "%";
+  var percent_lower_bound = 100*(ts_group_height + ts_plot_height)/(2*ts_group_height) + "%";
 
   // map of values to always be initialized for touchData.
   var touchSpec = {
@@ -79,10 +78,11 @@
     "cx": d => timeScaleF(d.time),
     "cy": "50%",
     "r": 20,
-    "fill": "red",
-    "opacity": 0.7,
-    "y": 0,
-    "title": ""
+    // "fill": "red",
+    "fill": "url(#diglett)",
+    "opacity": 1,
+    "y": "0%",
+    "title": "touches"
   };
   
   var pressureSpec = {
@@ -92,8 +92,9 @@
     "r": 2,
     "fill": "blue",
     "opacity": 0.8,
-    "y": 120,
-    "title": "air pressure"
+    "y": "20%",
+    "title": "air pressure",
+    "cy_baseFunction": () => pressure_to_y
   };
 
   var gyroscopeOneSpec = {
@@ -103,8 +104,9 @@
     "r": 2,
     "fill": "green",
     "opacity": 0.8,
-    "y": 240,
-    "title": "gyroscope (x)"
+    "y": "40%",
+    "title": "gyroscope (x)",
+    "cy_baseFunction": () => gyroscope_to_y
   }
 
   var gyroscopeTwoSpec = {
@@ -114,8 +116,9 @@
     "r": 2,
     "fill": "green",
     "opacity": 0.8,
-    "y": 340,
-    "title": "gyroscope (y)"
+    "y": "60%",
+    "title": "gyroscope (y)",
+    "cy_baseFunction": () => gyroscope_to_y
   }
 
   var gyroscopeThreeSpec = {
@@ -125,8 +128,9 @@
     "r": 2,
     "fill": "green",
     "opacity": 0.8,
-    "y": 440,
-    "title": "gyroscope (z)"
+    "y": "80%",
+    "title": "gyroscope (z)",
+    "cy_baseFunction": () => gyroscope_to_y
   }
 
   
@@ -206,6 +210,7 @@
       gyroscope_to_y = d3.scaleLinear()
         .domain([-1, 1])
         .range([100,0]);
+      
 
       viewBoxXMin = d3.scaleLinear()
         .domain([tau_open, tau_close])
@@ -316,7 +321,14 @@
       <linearGradient id="Gradient0" x1="0" x2="1" y1="0" y2="0">\
         <stop offset="0%" stop-color="white" stop-opacity="1" />\
         <stop offset="100%" stop-color="white" stop-opacity="0" />\
-      </linearGradient')
+      </linearGradient>\
+      <pattern id="diglett" height="1" width="1" patternContentUnits="objectBoundingBox" background-color:"red">\
+        <rect height="1" width="1" fill="red" opacity="0.6"></rect>\
+        <image x="0.15" y="0.15" height="0.7" width="0.7" xlink:href="media/diglett.png" preserveAspectRatio="none"></image>\
+      </pattern>\
+      <linearGradient id="heightGradient" gradientTransform="rotate(90)">\
+        <stop offset=5">\
+      </linearGradient>')
 
     svg.append('rect')
       .attr('x', margin.left)
@@ -325,11 +337,19 @@
       .attr('height', 700)
       .attr('fill', 'url(#Gradient0)');
 
-    // SECTION 1 - epsilon: INNER FUNCTION
+    // SECTION 1: INNER FUNCTION
     
-
     /**
-     * Creates the basic structure for a graph
+     * Creates the basic structure for a graph.
+     * <svg id="containerName">
+     *   <g class="axes" />
+     *   <svg class="dataViewPort"> outer bounding box, fixed height/width
+     *     <g class="canvas">  hosts the x-transformation, inherits height
+     *       VIZ GOES HERE
+     *     </g>
+     *   </svg>
+     *   <g class="plotLabels" />
+     * </svg>
      * @param {Object} time_series 
      * @param {Object} spec 
      * @param {string} containerName 
@@ -357,36 +377,24 @@
         axes.append("line")  // vertical
           .attr("class", "vertical-line")
           .attr("x1", width)
-          .attr("y1", percent_upper_bound + "%") 
+          .attr("y1", percent_upper_bound) 
           .attr("x2", width)
-          .attr("y2", percent_lower_bound + "%")
+          .attr("y2", percent_lower_bound)
           .attr("style", "stroke:rgb(220,220,220);stroke-width:2");
         
+        // creates a bounding box to see our elements
         let viewport = container.append("svg")
           .attr("class", "dataViewPort")
           .attr("y", (1-ts_plot_proportion)/2 * 100 + "%")
           .attr("height", ts_plot_proportion*100 + "%")
           .attr("width", width);
 
-        let labels = container.append("g")
-          .attr("class", "labels");
-        
-
         let graph = viewport.append("g")
           .attr("class", "canvas");
+          
+        let labels = container.append("g")
+          .attr("class", "plotLabels");
         
-        graph.append("g")
-          .attr("class", "circleContainer")
-          .selectAll("circle")
-          .data(time_series)
-          .enter()
-          .append('circle')
-          .attr("id", spec["id"])
-          .attr("cx", spec["cx"])
-          .attr("cy", spec["cy"])
-          .attr("r", spec["r"])
-          .attr("fill", spec["fill"])
-          .attr("opacity", spec["opacity"]);
 
         var returnObj = {
           "container": container,
@@ -406,9 +414,65 @@
 
     canvasses = document.querySelectorAll(".canvas");
 
+    
+
+    for (obj of [touch, pressure, gyroscopeOne, gyroscopeTwo, gyroscopeThree]) {
+      // plot circles according to spec
+      obj.container.select(".dataViewPort")
+        .select(".canvas")
+        .append("g")
+        .attr("class", "circleContainer")
+        .selectAll("circle")
+        .data(obj.data)
+        .enter()
+        .append('circle')
+        .attr("id", obj.spec["id"])
+        .attr("cx", obj.spec["cx"])
+        .attr("cy", obj.spec["cy"])
+        .attr("r", obj.spec["r"])
+        .attr("fill", obj.spec["fill"])
+        .attr("opacity", obj.spec["opacity"]);
+      
+      // add plot title
+      obj.container.select(".plotLabels")
+        .append("text")
+        .attr("class", "plotLabel plotTitle")
+        .attr("x", width)
+        .attr("y", "50%")
+        .attr("fill", obj.spec.fill)
+        .text(obj.spec.title)
+    }
+
+    // fix color of touch title
+    touch.container.select(".plotLabels").select(".plotTitle").attr("fill","red");
+    
+    
+    
+    
+    
+    for (obj of [pressure, gyroscopeOne, gyroscopeTwo, gyroscopeThree]) {
+      labels = obj.container.select(".plotLabels");
+      labels.append("text")
+        .attr("class", "plotLabel bound")
+        .attr("x", width)
+        .attr("y", percent_upper_bound)
+        .attr("fill", "#ACACAC")
+        .text(obj.spec["cy_baseFunction"]().domain()[1]);
+      labels.append("text")
+        .attr("class", "plotLabel bound")
+        .attr("x", width)
+        .attr("y", percent_lower_bound)
+        .attr("fill", "#ACACAC")
+        .text(obj.spec["cy_baseFunction"]().domain()[0]);
+    }
+    
+    // add vertical lines to pressure
     pressure.container
       .select(".dataViewPort")
       .select(".canvas")
+      .append("g")
+      .attr("class", "vLineContainer")
+      .attr("opacity", 0.3)
       .selectAll("line")
       .data(pressure.data)
       .enter()
@@ -420,22 +484,21 @@
       .attr("y2", pressure.spec["cy"])
       .attr("stroke", pressure.spec["fill"]);
 
+    // move horizontal axis to bottom
     pressure.container
       .select(".axes")
       .select(".horizontal-line")
       .attr("y1", (1+ts_plot_proportion)/2 * 100 + "%")
       .attr("y2", (1+ts_plot_proportion)/2 * 100 + "%");
 
-    
+    // add vertical lines to gyroscope
     for (const obj of [gyroscopeOne, gyroscopeTwo, gyroscopeThree]) {
-      console.log(obj.data);
-      console.log(obj.spec);
       obj.container
         .select(".dataViewPort")
         .select(".canvas")        
         .append("g")
         .attr("class", "vLineContainer")
-        .attr("opacity", 0.5)
+        .attr("opacity", 0.3)
         .selectAll("line")
         .data(obj.data)
         .enter()
@@ -446,7 +509,6 @@
         .attr("x2", obj.spec["cx"])
         .attr("y2", obj.spec["cy"])
         .attr("stroke", obj.spec["fill"]);
-        //.attr("opacity", 0.8);
     }
 
     /*
@@ -484,6 +546,7 @@
     activateFunctions[1] = showTouchAndVideo;
     activateFunctions[2] = showPressure;
     activateFunctions[3] = showGyroscope;
+    activateFunctions[4] = focusPressure;
     
 
     // updateFunctions are called while
@@ -564,6 +627,10 @@
       .transition()
       .attr("opacity", 1)
       .duration(transition_duration);
+  }
+
+  function focusPressure() {
+    console.log("focusPressure()");
   }
 
   /**
@@ -668,14 +735,12 @@
     });
   }
 
+  
   function stopAnimation() {
     // TODO can I just use a global reference to these variables?
     // after all, i assume d3 selections are simply pointers, 
     // and so a single *static* selection statement has *dynamic* value through the program runtime.
-    var subcontainers = ["#touchContainer", ];
-    for (const subcontainer of subcontainers) {
-      g.select(subcontainer).select(".data").selectAll("*").interrupt();
-    }
+    
 
     var canvasses = document.querySelectorAll(".canvas");
     gsap.killTweensOf(canvasses);
