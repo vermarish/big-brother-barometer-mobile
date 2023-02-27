@@ -64,12 +64,12 @@
   var transition_duration = 1000;  // unit ms
 
   // for time-series plot height
-  var ts_group_height = 100;  // vertical axis length + margin
+  var ts_group_height = "18%";  // vertical axis length + margin
   var ts_plot_proportion = 0.8;
-  var ts_plot_height = ts_plot_proportion*ts_group_height;   // vertical axis length
+  var ts_plot_height = ts_plot_proportion * 100 + "%"
 
-  var percent_upper_bound = 100*(ts_group_height - ts_plot_height)/(2*ts_group_height) + "%";
-  var percent_lower_bound = 100*(ts_group_height + ts_plot_height)/(2*ts_group_height) + "%";
+  var percent_upper_bound = (1 - ts_plot_proportion)/2 * 100 + "%";
+  var percent_lower_bound = (1 + ts_plot_proportion)/2 * 100 + "%";
 
   // map of values to always be initialized for touchData.
   var touchSpec = {
@@ -385,8 +385,8 @@
         // creates a bounding box to see our elements
         let viewport = container.append("svg")
           .attr("class", "dataViewPort")
-          .attr("y", (1-ts_plot_proportion)/2 * 100 + "%")
-          .attr("height", ts_plot_proportion*100 + "%")
+          .attr("y", percent_upper_bound)
+          .attr("height", ts_plot_height)
           .attr("width", width);
 
         let graph = viewport.append("g")
