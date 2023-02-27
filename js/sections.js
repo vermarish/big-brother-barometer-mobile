@@ -324,7 +324,7 @@
       </linearGradient>\
       <pattern id="diglett" height="1" width="1" patternContentUnits="objectBoundingBox" background-color:"red">\
         <rect height="1" width="1" fill="red" opacity="0.6"></rect>\
-        <image x="0.15" y="0.15" height="0.7" width="0.7" xlink:href="media/diglett.png" preserveAspectRatio="none"></image>\
+        <image x="0.15" y="0.15" height="0.7" width="0.7" xlink:href="https://user-images.githubusercontent.com/11370378/221710561-2943c652-35a2-4841-8a0b-6bd8f5c215bc.png" preserveAspectRatio="none"></image>\
       </pattern>\
       <linearGradient id="heightGradient" gradientTransform="rotate(90)">\
         <stop offset=5">\
