@@ -71,6 +71,9 @@
   var percent_upper_bound = (1 - ts_plot_proportion)/2 * 100 + "%";
   var percent_lower_bound = (1 + ts_plot_proportion)/2 * 100 + "%";
 
+  var right_margin_position = (margin.top + width) / (margin.top + width + margin.right) * 100 + "%";
+  console.log(right_margin_position);
+
   // map of values to always be initialized for touchData.
   var touchSpec = {
     "id": d => d.i, // id is hardcoded instead of being indexed as
@@ -185,7 +188,8 @@
       // build all of our conversion functions using t_open, t_close
       timeScaleF = d3.scaleLinear()  // TODO refactor timeScaleF to xAtStart
       .domain([t_open, t_close])
-      .range([width, width*(1+gui_stretch)]);
+      // .range([width, width*(1+gui_stretch)]);
+      .range([0, width*gui_stretch]);
 
       /*
       timeScaleG = d3.scaleLinear()
@@ -389,8 +393,15 @@
           .attr("height", ts_plot_height)
           .attr("width", width);
 
-        let graph = viewport.append("g")
-          .attr("class", "canvas");
+        
+        
+        viewport.append("g")
+          .attr("class", "canvasShifter")  // for static (un-animated) translation
+          .attr("transform", "translate(" + width + " 0)")
+          //.attr("x", "200")
+          .attr("overflow", "visible")
+          .append("g")
+          .attr("class", "canvas");  // do visualization in here, then animate translation
           
         let labels = container.append("g")
           .attr("class", "plotLabels");
@@ -419,9 +430,11 @@
     for (obj of [touch, pressure, gyroscopeOne, gyroscopeTwo, gyroscopeThree]) {
       // plot circles according to spec
       obj.container.select(".dataViewPort")
+        .select(".canvasShifter")
         .select(".canvas")
         .append("g")
         .attr("class", "circleContainer")
+        .attr("opacity", obj.spec["opacity"])
         .selectAll("circle")
         .data(obj.data)
         .enter()
@@ -430,8 +443,7 @@
         .attr("cx", obj.spec["cx"])
         .attr("cy", obj.spec["cy"])
         .attr("r", obj.spec["r"])
-        .attr("fill", obj.spec["fill"])
-        .attr("opacity", obj.spec["opacity"]);
+        .attr("fill", obj.spec["fill"]);
       
       // add plot title
       obj.container.select(".plotLabels")
@@ -469,6 +481,7 @@
     // add vertical lines to pressure
     pressure.container
       .select(".dataViewPort")
+      .select(".canvasShifter")
       .select(".canvas")
       .append("g")
       .attr("class", "vLineContainer")
@@ -495,6 +508,7 @@
     for (const obj of [gyroscopeOne, gyroscopeTwo, gyroscopeThree]) {
       obj.container
         .select(".dataViewPort")
+        .select(".canvasShifter")
         .select(".canvas")        
         .append("g")
         .attr("class", "vLineContainer")
@@ -698,7 +712,7 @@
     var tau_to = tau_close;
     var p_close = p_tau(tau_close);
 
-    
+    /*
     var touches = g.select("#touchContainer").select(".data").selectAll("*");
     
     for (const series of [touches]) {
@@ -723,7 +737,7 @@
         .duration(0)
         .remove();
     }
-
+    */
     gsap.killTweensOf(canvasses);
     gsap.fromTo(canvasses, {
       x: canvasX(tau_curr), 
