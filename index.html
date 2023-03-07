@@ -2,7 +2,7 @@
 <meta charset="UTF-8">
 <html>
 <head>
-  <title>Scrolling Sections</title>
+  <title>Big Brother Barometer</title>
   <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
   <link rel="stylesheet" type="text/css" href="css/style.css"/>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-N6TP75FKVS"></script>
@@ -16,15 +16,24 @@
 </head>
 <body>
 <div class="container">
+  
   <div id='graphic'>
     <div id='sections'>
-      <section class="step"> <!-- Abstract-->
-        <div class="title">Big Brother Barometer</div>
-        This fun little vulnerability uses machine learning to break into a locked smartphone using only the motion sensors.
+      <section class="step" style="opacity: 1;"> <!-- Abstract-->
+        <div class="main-title">Big<br>Brother<br>Barometer</div>
+        <br>
+        This fun little vulnerability uses machine learning to break into a locked smartphone using nothing but the motion sensors.
         <br/><br/>
         Here's how it works.
         <br/><br/>
-        &or; Scroll to continue. ⇊
+        <div id="keep-scrolling">
+          <div id="animated-arrow" class="hover-animation">
+            <p>Scroll</p>
+            <svg width="40" height="10">
+              <path d="M0,0L40,0L20,10Z" fill="#767678"></path>
+            </svg>
+          </div>
+        </div>
       </section>
       <section class="step">
         <div class="title"></div>
@@ -64,12 +73,10 @@
       </section>
     </div>
     <div id='vis'>
-      
-        <video id="video" width="500px" height="281px" preload="none" poster="https://user-images.githubusercontent.com/11370378/220777813-f10345aa-691e-43f0-a50c-5b8d532057f6.png">
-          <source id="mp4" src="https://user-images.githubusercontent.com/11370378/220777717-a3e97b02-5bdf-43fb-90a8-623392c7f9c7.mp4" type="video/mp4">
-          <p>Your browser does not support HTML5 videos with .mp4 encoding.</p>
-        </video>
-      
+      <video id="video" width="500px" height="281px" preload="none" poster="https://user-images.githubusercontent.com/11370378/220777813-f10345aa-691e-43f0-a50c-5b8d532057f6.png">
+        <source id="mp4" src="https://user-images.githubusercontent.com/11370378/220777717-a3e97b02-5bdf-43fb-90a8-623392c7f9c7.mp4" type="video/mp4">
+        <p>Your browser does not support HTML5 videos with .mp4 encoding.</p>
+      </video>
     </div>
     <div id="extra-space">
     </div>
@@ -77,9 +84,9 @@
 </div>
 
 
+<script src="lib/gsap.min.js"></script>
 <script src="lib/d3.js"></script>
 <script src="js/scroller.js"></script>
 <script src="js/sections.js"></script>
-<script src="lib/gsap.min.js"></script>
 </body>
 </html>

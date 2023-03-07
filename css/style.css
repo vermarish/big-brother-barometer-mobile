@@ -11,23 +11,34 @@
 #sections {
   position: relative;
   display: inline-block;
-  width: 250px;
+  width: 45%;
   top: 0px;
   z-index: 90;
   padding-bottom: 200px;
+  font-size:16px;
 }
 
 .step {
   margin-bottom: 200px;
-  font-family: "OpenSans", "Arial","TiemposTextWeb-Regular","Georgia";
-  font-size: 16px;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 1.2em;
   line-height: 23px;
-  color: #767678;
+  color: #464648;
+  opacity: 0.1;
 }
 
 #sections .title {
   font-family: Arial,Helvetica,"san-serif";
-  font-size: 16px;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 2px;
+  color: #262626;
+  line-height: 1.2em;
+}
+
+#sections .main-title {
+  font-family: Arial,Helvetica,"san-serif";
+  font-size: 2.5em;
   font-weight: bold;
   margin-bottom: 2px;
   color: #262626;
@@ -50,13 +61,15 @@
 }
 
 #vis .title {
-  font-size:120px;
+  font-size:5em;
   text-anchor: middle;
+  opacity: 0.7;
 }
 
 #vis .sub-title {
-  font-size:80px;
+  font-size:3em;
   text-anchor: middle;
+  opacity: 0.7;
 }
 
 .axis path,
@@ -89,6 +102,10 @@
 }
 
 
+
+
+
+
 .plotLabels {
   transform: translate(0.5rem,0px);
   font-size:1rem;
@@ -102,4 +119,63 @@
 
 .plotLabels > .plotTitle {
   font-size:1.2rem;
+}
+
+
+#hidden {
+  visibility: hidden;
+}
+
+#keep-scrolling {
+  position: absolute;
+  top: 20em;
+  width: 100%;
+}
+
+#animated-arrow {
+  position: absolute;
+  text-align: center;
+  width: 100%;  
+}
+
+#animated-arrow p {
+  text-transform: uppercase;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0;
+}
+
+#animated-arrow svg {
+  margin: 0 auto;
+}
+
+.hover-animation {
+  -moz-animation-duration: 0.8s;
+  -webkit-animation-duration: 0.8s;
+  -moz-animation-name: slidein;
+  -webkit-animation-name: slidein;
+  -moz-animation-iteration-count: infinite;
+  -webkit-animation-iteration-count: infinite;
+  -moz-animation-direction: alternate;
+  -webkit-animation-direction: alternate;
+}
+
+@-moz-keyframes slidein {
+  from {
+    top: 0;
+  }
+
+  to {
+    top: 10px;
+  }
+}
+
+@-webkit-keyframes slidein {
+  from {
+    top: 10px;
+  }
+
+  to {
+    top: 0;
+  }
 }

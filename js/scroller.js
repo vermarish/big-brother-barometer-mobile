@@ -73,10 +73,13 @@ function scroller() {
     // of the first section.
     sectionPositions = [];
     var startPos;
+    var relativePos;
     sections.each(function (d, i) {
       var top = this.getBoundingClientRect().top;
       if (i === 0) {
         startPos = top;
+      } else {
+        top = top - 200;
       }
       sectionPositions.push(top - startPos);
     });

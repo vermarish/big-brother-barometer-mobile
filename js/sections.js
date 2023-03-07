@@ -28,8 +28,18 @@
   // for displaying visualizations
   var g = null;
 
+  // sub-selections used for individual visualizations
+  var touch = null;
+  var pressure = null;
+  var gyroscopeOne = null;
+  var gyroscopeTwo = null;
+  var gyroscopeThree = null;
+  var touchBar = null;
+
+
   // gsap selection for animating time series
-  var canvasses = null;
+  var containers = null;  // for height
+  var canvasses = null;   // for time
 
   var video = document.getElementById('video');
 
@@ -53,6 +63,7 @@
   var t_to_p = null;
   var pressure_to_y = null;
   var gyroscope_to_y = null;
+  var touchConfidence_to_y;
   
   
   var canvasX = null;
@@ -136,6 +147,17 @@
     "cy_baseFunction": () => gyroscope_to_y
   }
 
+  var touchConfidenceSpec = {
+    "id": d => d.i,
+    "cx": d => timeScaleF(d.time),
+    "cy": d => touchConfidence_to_y(d.p) + "%",
+    "r": 4,
+    "fill": "cyan",
+    "opacity": 0.8,
+    "y": "60%",
+    "title": "touch model",
+    "cy_baseFunction": () => touchConfidence_to_y
+  }
   
   // When scrolling to a new section, the activation function 
   // for that section is called.
@@ -178,6 +200,7 @@
       var touchData = rawData.touch_actual;
       var pressureData = rawData.pressure_data;
       var gyroscopeData = rawData.gyroscope_data;
+      var touchConfidence = rawData.touch_confidence;
 
       t_open = rawData.t_open[0];
       t_close = rawData.t_close[0];
@@ -188,14 +211,7 @@
       // build all of our conversion functions using t_open, t_close
       timeScaleF = d3.scaleLinear()  // TODO refactor timeScaleF to xAtStart
       .domain([t_open, t_close])
-      // .range([width, width*(1+gui_stretch)]);
       .range([0, width*gui_stretch]);
-
-      /*
-      timeScaleG = d3.scaleLinear()
-      .domain([t_open, t_close])
-      .range([width*(1-gui_stretch), width]);
-      */
 
       t_to_p = d3.scaleLinear()
       .domain([t_open, t_close])
@@ -215,6 +231,9 @@
         .domain([-1, 1])
         .range([100,0]);
       
+      touchConfidence_to_y = d3.scaleLinear()
+        .domain([0,1])
+        .range([100,0]);
 
       viewBoxXMin = d3.scaleLinear()
         .domain([tau_open, tau_close])
@@ -246,8 +265,9 @@
       precompute(touchData);
       precompute(pressureData);
       precompute(gyroscopeData);
+      precompute(touchConfidence);
 
-      setupVis(touchData, pressureData, gyroscopeData);
+      setupVis(touchData, pressureData, gyroscopeData, touchConfidence);
 
       setupSections();
     });
@@ -264,43 +284,14 @@
    * @param histData - binned histogram data
    */
   
-  var setupVis = function (touchData, pressureData, gyroscopeData) {
+  var setupVis = function (touchData, pressureData, gyroscopeData, touchConfidence) {
     // count openvis title
-    g.append('text')
-      .attr('class', 'title openvis-title')
-      .attr('x', width / 2)
-      .attr('y', height / 3)
-      .text('');
-
-    g.append('text')
-      .attr('class', 'sub-title openvis-title')
-      .attr('x', width / 2)
-      .attr('y', (height / 3) + (height / 5))
-      .text('');
-
-    g.selectAll('.openvis-title')
-      .attr('opacity', 0);
-
-    // count filler word count title
-    g.append('text')
-      .attr('class', 'title count-title highlight')
-      .attr('x', width / 2)
-      .attr('y', height / 3)
-      .text('180');
-
-    g.append('text')
-      .attr('class', 'sub-title count-title')
-      .attr('x', width / 2)
-      .attr('y', (height / 3) + (height / 5))
-      .text('Filler Words');
-
-    g.selectAll('.count-title')
-      .attr('opacity', 0);
-
+    
     // SECTION 0: video
     video.loop = false;
     video.volume = 0;
-    video.controls = false;
+    video.controls = true;
+    video.style = "visibility: hidden;";
     // video.parentElement.append('rect');  // TODO cover the video with white
     
     // setup the video listeners
@@ -317,6 +308,7 @@
       }
     });
 
+    video.play();
     //setup
 
     // SECTION 0.5: gradient
@@ -324,6 +316,7 @@
       .html('\
       <linearGradient id="Gradient0" x1="0" x2="1" y1="0" y2="0">\
         <stop offset="0%" stop-color="white" stop-opacity="1" />\
+        <stop offset="90%" stop-color="white" stop-opacity="1" />\
         <stop offset="100%" stop-color="white" stop-opacity="0" />\
       </linearGradient>\
       <pattern id="diglett" height="1" width="1" patternContentUnits="objectBoundingBox" background-color:"red">\
@@ -335,9 +328,10 @@
       </linearGradient>')
 
     svg.append('rect')
-      .attr('x', margin.left)
+      .attr('id', 'cover')
+      .attr('x', "0%")
       .attr('y', margin.top)
-      .attr('width', 100)
+      .attr('width', "100%")
       .attr('height', 700)
       .attr('fill', 'url(#Gradient0)');
 
@@ -393,8 +387,6 @@
           .attr("height", ts_plot_height)
           .attr("width", width);
 
-        
-        
         viewport.append("g")
           .attr("class", "canvasShifter")  // for static (un-animated) translation
           .attr("transform", "translate(" + width + " 0)")
@@ -417,17 +409,44 @@
     }
 
     
-    var touch = plot_time_series(touchData, touchSpec, "touchContainer");
-    var pressure = plot_time_series(pressureData, pressureSpec, "pressureContainer");
-    var gyroscopeOne = plot_time_series(gyroscopeData, gyroscopeOneSpec, "gyroscopeOneContainer");
-    var gyroscopeTwo = plot_time_series(gyroscopeData, gyroscopeTwoSpec, "gyroscopeTwoContainer");
-    var gyroscopeThree = plot_time_series(gyroscopeData, gyroscopeThreeSpec, "gyroscopeThreeContainer");
+    touch = plot_time_series(touchData, touchSpec, "touchContainer");
+    pressure = plot_time_series(pressureData, pressureSpec, "pressureContainer");
+    gyroscopeOne = plot_time_series(gyroscopeData, gyroscopeOneSpec, "gyroscopeOneContainer");
+    gyroscopeTwo = plot_time_series(gyroscopeData, gyroscopeTwoSpec, "gyroscopeTwoContainer");
+    gyroscopeThree = plot_time_series(gyroscopeData, gyroscopeThreeSpec, "gyroscopeThreeContainer");
+    touchBar = plot_time_series(touchData, touchSpec, "touchBarContainer");
+    touchConfidence = plot_time_series(touchConfidence, touchConfidenceSpec, "touchConfidenceContainer");
 
+    // create touchBars
+    touchBar.container
+      .attr("y", "0")
+      .attr("height", "100%")
+      .select(".dataViewPort")
+      .attr("height", "100%");
+    touchBar.container.select(".axes").remove();
+    touchBar.container.select(".canvasShifter").select(".canvas")
+      .append("g")
+      .attr("class", "lineContainer")
+      .attr("opacity", 0.3)
+      .attr("stroke", "red")
+      .attr("stroke-width", "2")
+      .selectAll("line")
+      .data(touchBar.data)
+      .enter()
+      .append("line")
+      .attr("x1", touchSpec["cx"])
+      .attr("y1", "0%")
+      .attr("x2", touchSpec["cx"])
+      .attr("y2", "100%");
+
+    containers = document.querySelectorAll(".timeSeriesContainer");
     canvasses = document.querySelectorAll(".canvas");
-
+    console.log(touch.container);
+    console.log(containers[0]);
     
-
-    for (obj of [touch, pressure, gyroscopeOne, gyroscopeTwo, gyroscopeThree]) {
+    
+    // plot circles
+    for (obj of [touch, pressure, gyroscopeOne, gyroscopeTwo, gyroscopeThree, touchConfidence]) {
       // plot circles according to spec
       obj.container.select(".dataViewPort")
         .select(".canvasShifter")
@@ -455,26 +474,43 @@
         .text(obj.spec.title)
     }
 
+    // plot lines
+    /* TODO cd .. plot touchConfidence as a line
+    for (obj of [touchConfidence]) {
+      let line = d3.line()
+        .x(obj.spec["cx"])
+        .y(d => obj.spec.cy_baseFunction())
+
+      obj.container.select(".dataViewPort")
+        .select(".canvasShifter")
+        .select(".canvas")
+        .append("g")
+        .attr("class", "lineContainer")
+        .attr("opacity", obj.spec["opacity"])
+        .
+    }
+    */
+
     // fix color of touch title
     touch.container.select(".plotLabels").select(".plotTitle").attr("fill","red");
     
     
     
     
-    
-    for (obj of [pressure, gyroscopeOne, gyroscopeTwo, gyroscopeThree]) {
+    // add y-axis limits
+    for (obj of [pressure, gyroscopeOne, gyroscopeTwo, gyroscopeThree, touchConfidence]) {
       labels = obj.container.select(".plotLabels");
       labels.append("text")
         .attr("class", "plotLabel bound")
         .attr("x", width)
         .attr("y", percent_upper_bound)
-        .attr("fill", "#ACACAC")
+        .attr("fill", "#999")
         .text(obj.spec["cy_baseFunction"]().domain()[1]);
       labels.append("text")
         .attr("class", "plotLabel bound")
         .attr("x", width)
         .attr("y", percent_lower_bound)
-        .attr("fill", "#ACACAC")
+        .attr("fill", "#999")
         .text(obj.spec["cy_baseFunction"]().domain()[0]);
     }
     
@@ -498,11 +534,13 @@
       .attr("stroke", pressure.spec["fill"]);
 
     // move horizontal axis to bottom
-    pressure.container
-      .select(".axes")
-      .select(".horizontal-line")
-      .attr("y1", (1+ts_plot_proportion)/2 * 100 + "%")
-      .attr("y2", (1+ts_plot_proportion)/2 * 100 + "%");
+    for (const obj of [pressure, touchConfidence]) {
+      obj.container
+        .select(".axes")
+        .select(".horizontal-line")
+        .attr("y1", (1+ts_plot_proportion)/2 * 100 + "%")
+        .attr("y2", (1+ts_plot_proportion)/2 * 100 + "%");
+    }
 
     // add vertical lines to gyroscope
     for (const obj of [gyroscopeOne, gyroscopeTwo, gyroscopeThree]) {
@@ -525,17 +563,37 @@
         .attr("stroke", obj.spec["fill"]);
     }
 
-    /*
-    cd ..
-    label plots
-    do more text
-    create function for pressure coloring
-    put first linear model
-    ⋮ 
-    table of contents
-    ⋮
-    n. make lines
-    */
+    touchConfidence.container.attr("height", "36%");
+
+    let todoContainer = svg.append("g")
+      .attr('id', 'todoContainer')
+      .attr('opacity', 0);
+
+    todoContainer.append('rect')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('fill', 'white')
+      .attr('opacity', '0.62');
+
+    todoContainer.append('text')
+      .attr('class', 'title openvis-title')
+      .attr('x', width / 2)
+      .attr('y', height / 3)
+      .text('#TODO');
+
+    todoContainer.append('text')
+      .attr('class', 'sub-title openvis-title')
+      .attr('x', width / 2)
+      .attr('y', (height / 3) + (height / 5))
+      .text('everything below this is');
+
+      todoContainer.append('text')
+      .attr('class', 'sub-title openvis-title')
+      .attr('x', width / 2)
+      .attr('y', (height * 2/3) - (height / 30))
+      .text('a work in progress.');
   };
 
   /**
@@ -561,6 +619,8 @@
     activateFunctions[2] = showPressure;
     activateFunctions[3] = showGyroscope;
     activateFunctions[4] = focusPressure;
+    activateFunctions[5] = showTouchConfidence;
+    activateFunctions[6] = showToDo;
     
 
     // updateFunctions are called while
@@ -594,6 +654,19 @@
       .transition()
       .attr("opacity", 0)
       .duration(transition_duration);
+
+    d3.select("#keep-scrolling")
+      .transition()
+      .style("opacity", 1)
+      .duration(400);
+    
+    video.style = "visibility: hidden;";
+
+    
+    svg.select("#cover")
+      .transition()
+      .attr("x", "0%")
+      .delay(transition_duration);
   }
 
   /**
@@ -601,8 +674,19 @@
    * shows: touch and video
    */
   function showTouchAndVideo() {
-    video.play();
-    video.controls = "true";
+  d3.select("#keep-scrolling")
+      .transition()
+      .style("opacity", 0)
+      .duration(400);
+
+    // TODO video should fade in using a canvas like https://jsfiddle.net/7sk5k4gp/13/ 
+    video.style = "";
+    //video.controls = "true";
+
+    svg.select("#cover")
+      .transition()
+      .attr("x", "-80%")
+      .duration(3500);
 
     g.select("#touchContainer")
       .transition()
@@ -637,16 +721,156 @@
    * shows: gyroscope
    */
   function showGyroscope() {
+    /*g.selectAll("#gyroscopeOneContainer, #gyroscopeTwoContainer, #gyroscopeThreeContainer")
+      .transition()
+      .attr("opacity", 1)
+      .duration(transition_duration);*/
+    
+    g.select("#touchBarContainer")
+      .transition()
+      .attr("opacity", "0")
+      .duration(transition_duration);
+
+    g.select("#pressureContainer")
+      .transition()
+      .attr("height", "18%")
+      .attr("opacity", "1")
+      .duration(transition_duration);
+    
+    g.select("#gyroscopeOneContainer")
+      .transition()
+      .attr("y", "40%")
+      .attr("height","18%")
+      .attr("opacity", "1")
+      .duration(transition_duration);
+
+    g.select("#gyroscopeTwoContainer")
+      .transition()
+      .attr("y", "60%")
+      .attr("height","18%")
+      .attr("opacity", "1")
+      .duration(transition_duration);
+
+    g.select("#gyroscopeThreeContainer")
+      .transition()
+      .attr("y", "80%")
+      .attr("height","18%")
+      .attr("opacity","1")
+      .duration(transition_duration);
+
+    pressure.container
+      .select(".dataViewPort")
+      .select(".canvasShifter")
+      .select(".canvas")
+      .select(".circleContainer")
+      .attr("opacity", pressure.spec["opacity"])
+      .selectAll("circle")
+      .transition()
+      .attr("fill", pressure.spec["fill"])
+      .attr("r", pressure.spec["r"])
+      .delay(transition_duration/2);
+  }
+
+  /**
+   * moves: pressure and gyroscope
+   * hides: touchConfidence
+   */
+  function focusPressure() {
+    /*
+    g.select("#touchBarContainer")
+      .transition()
+      .attr("opacity", "1")
+      .duration(transition_duration);
+      */
+    touchBar.container
+      .transition()
+      .attr("opacity", "1")
+      .duration(transition_duration);
+
+    
+    pressure.container
+      .transition()
+      .attr("height", "38%")
+      .duration(transition_duration);
+    
+    gyroscopeOne.container
+      .transition()
+      .attr("y", "60%")
+      .attr("height", "11%")
+      .duration(transition_duration);
+
+    gyroscopeTwo.container
+      .transition()
+      .attr("y", "73%")
+      .attr("height", "11%")
+      .duration(transition_duration);
+  
+    gyroscopeThree.container
+      .transition()
+      .attr("y", "86%")
+      .attr("height", "11%")
+      .duration(transition_duration);
+
+    pressure.container
+      .select(".dataViewPort")
+      .select(".canvasShifter")
+      .select(".canvas")
+      .select(".circleContainer")
+      .selectAll("*")
+      .transition()
+      .attr("r", 4)
+      .duration(transition_duration);
+
+    
+    pressure.container
+      .select(".dataViewPort")
+      .select(".canvasShifter")
+      .select(".canvas")
+      .select(".circleContainer")
+      .attr("opacity", 1)
+      .selectAll("circle")
+      .attr("fill", d => d3.interpolatePlasma((pressure_to_y(d.one))/100));
+    
+    g.select("#touchConfidenceContainer")
+      .transition()
+      .attr("opacity", 0)
+      .duration(transition_duration);
+  }
+
+  /**
+   * hides: gyroscope
+   * shows: touch confidence
+   */
+  function showTouchConfidence() {
     g.selectAll("#gyroscopeOneContainer, #gyroscopeTwoContainer, #gyroscopeThreeContainer")
+      .transition()
+      .attr("opacity", 0)
+      .duration(transition_duration);
+    
+    g.select("#touchConfidenceContainer")
+      .transition()
+      .attr("opacity", 1)
+      .duration(transition_duration);
+    
+    hideToDo();
+  }
+
+
+  function hideToDo() {
+    svg.select("#todoContainer")
+      .transition()
+      .attr("opacity", 0)
+      .duration(transition_duration);
+  }
+
+  function showToDo() {
+    console.log("showToDo()");
+    svg.select("#todoContainer")
       .transition()
       .attr("opacity", 1)
       .duration(transition_duration);
   }
-
-  function focusPressure() {
-    console.log("focusPressure()");
-  }
-
+  
   /**
    * Whatever time the video's at, set the whole canvas to that time.
    * (NO ANIMATING DONE HERE)
@@ -861,7 +1085,9 @@ function display(data) {
   scroll.on('active', function (index) {
     // highlight current step text
     d3.selectAll('.step')
-      .style('opacity', function (d, i) { return i === index ? 1 : 0.1; });
+      .transition()
+      .style('opacity', function (d, i) { return i <= index ? 1 : 0.1; })
+      .duration(200);
 
     // activate current section
     plot.activate(index);
