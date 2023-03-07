@@ -63,13 +63,15 @@
 #vis .title {
   font-size:5em;
   text-anchor: middle;
-  opacity: 0.7;
+  opacity: 0.5;
+  fill: rgb(0, 115, 255);
+  stroke: none;
 }
 
 #vis .sub-title {
   font-size:3em;
   text-anchor: middle;
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 .axis path,

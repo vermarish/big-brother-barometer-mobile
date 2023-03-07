@@ -581,13 +581,13 @@
       .attr('class', 'title openvis-title')
       .attr('x', width / 2)
       .attr('y', height / 3)
-      .text('#TODO');
+      .text('// TODO');
 
     todoContainer.append('text')
       .attr('class', 'sub-title openvis-title')
       .attr('x', width / 2)
       .attr('y', (height / 3) + (height / 5))
-      .text('everything below this is');
+      .text('Everything below this is');
 
       todoContainer.append('text')
       .attr('class', 'sub-title openvis-title')
