@@ -186,7 +186,8 @@
       svg = svg.merge(svgE);
 
       svg.attr('width', width + margin.left + margin.right);
-      svg.attr('height', height + margin.top + margin.bottom);
+      // svg.attr('height', height + margin.top + margin.bottom);
+      svg.attr('height', 400);
 
       svg.append('g');
 
@@ -194,7 +195,8 @@
       // this group element will be used to contain all
       // other elements.
       g = svg.select('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        // .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        .attr('transform', 'translate(-300,10)')
 
       // ALL DATA PRE-COMPUTATIONS FOLLOW HERE
       var touchData = rawData.touch_actual;
@@ -331,7 +333,7 @@
       .attr('id', 'cover')
       .attr('x', "0%")
       .attr('y', margin.top)
-      .attr('width', "100%")
+      .attr('width', "60%")
       .attr('height', 700)
       .attr('fill', 'url(#Gradient0)');
 
