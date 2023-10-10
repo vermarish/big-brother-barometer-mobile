@@ -318,8 +318,8 @@
       .html('\
       <linearGradient id="Gradient0" x1="0" x2="1" y1="0" y2="0">\
         <stop offset="0%" stop-color="white" stop-opacity="1" />\
-        <stop offset="85%" stop-color="white" stop-opacity="1" />\
-        <stop offset="90%" stop-color="white" stop-opacity="0" />\
+        <stop offset="80%" stop-color="white" stop-opacity="1" />\
+        <stop offset="85%" stop-color="white" stop-opacity="0" />\
         <stop offset="100%" stop-color="white" stop-opacity="0" />\
       </linearGradient>\
       <pattern id="diglett" height="1" width="1" patternContentUnits="objectBoundingBox" background-color:"red">\
