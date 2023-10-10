@@ -1,10 +1,10 @@
 
 .container {
-  width: 890px;
+  width: 100%;
 }
 
 #graphic {
-  padding-top: 60px;
+  padding-top: 10px;
 }
 
 
@@ -52,9 +52,10 @@
 #vis {
   display: inline-block;
   position: fixed;
-  top: 60px;
   z-index: 1;
   margin-left: 0;
+  width: 55%;
+  float: right;
   /* height: 600px; */
   /* width: 600px; */
   /* background-color: #ddd; */
@@ -72,6 +73,11 @@
   font-size:3em;
   text-anchor: middle;
   opacity: 0.5;
+}
+
+#video {
+  position: absolute;
+  left: 265px;
 }
 
 .axis path,
@@ -130,7 +136,6 @@
 
 #keep-scrolling {
   position: absolute;
-  top: 20em;
   width: 100%;
 }
 
