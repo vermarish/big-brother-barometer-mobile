@@ -152,7 +152,7 @@
     "cx": d => timeScaleF(d.time),
     "cy": d => touchConfidence_to_y(d.p) + "%",
     "r": 4,
-    "fill": "cyan",
+    "fill": "#0AD4BF",
     "opacity": 0.8,
     "y": "60%",
     "title": "touch model",
