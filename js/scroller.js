@@ -81,7 +81,8 @@ function scroller() {
       } else {
         top = top - 200;
       }
-      sectionPositions.push(top - startPos);
+      // sectionPositions.push(top - startPos);
+      sectionPositions.push(top - startPos + 200);
     });
     containerStart = container.node().getBoundingClientRect().top + window.pageYOffset;
   }
@@ -107,6 +108,8 @@ function scroller() {
     var prevIndex = Math.max(sectionIndex - 1, 0);
     var prevTop = sectionPositions[prevIndex];
     var progress = (pos - prevTop) / (sectionPositions[sectionIndex] - prevTop);
+    console.log("pos: " + pos);
+    console.log("progress: " + progress);
     // @v4 you now `.call` the dispatch callback
     dispatch.call('progress', this, currentIndex, progress);
   }

@@ -196,7 +196,7 @@
       // other elements.
       g = svg.select('g')
         // .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-        .attr('transform', 'translate(-300,10)')
+        .attr('transform', 'translate(-320,10)')
 
       // ALL DATA PRE-COMPUTATIONS FOLLOW HERE
       var touchData = rawData.touch_actual;
@@ -318,7 +318,8 @@
       .html('\
       <linearGradient id="Gradient0" x1="0" x2="1" y1="0" y2="0">\
         <stop offset="0%" stop-color="white" stop-opacity="1" />\
-        <stop offset="90%" stop-color="white" stop-opacity="1" />\
+        <stop offset="85%" stop-color="white" stop-opacity="1" />\
+        <stop offset="90%" stop-color="white" stop-opacity="0" />\
         <stop offset="100%" stop-color="white" stop-opacity="0" />\
       </linearGradient>\
       <pattern id="diglett" height="1" width="1" patternContentUnits="objectBoundingBox" background-color:"red">\
@@ -333,7 +334,7 @@
       .attr('id', 'cover')
       .attr('x', "0%")
       .attr('y', margin.top)
-      .attr('width', "60%")
+      .attr('width', "100%")
       .attr('height', 700)
       .attr('fill', 'url(#Gradient0)');
 
