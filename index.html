@@ -22,7 +22,7 @@
       <section class="step" style="opacity: 1;"> <!-- Abstract-->
         <div class="main-title">Big<br>Brother<br>Barometer</div>
         <br>
-        This fun little vulnerability uses machine learning to break into a locked smartphone using nothing but the motion sensors.
+        This fun little vulnerability uses <bold>machine learning</bold> to break into a locked smartphone using nothing but the motion sensors.
         <br/><br/>
         Here's how it works.
         <br/><br/>
@@ -37,17 +37,22 @@
       </section>
       <section class="step">
         <div class="title"></div>
-        The attack starts innocently, with a game of Whack-A-Mole. 
-        <br/>
-        The user taps on different parts of the screen, and the game records the occurrence of each tap.
+        The attack starts with a mobile game. We'll use whack-a-mole!
+        <br/><br/>
+        As the user plays, the game
+        records as much data as it can.
       </section>
       <section class="step">
         <div class="title"></div>
-        Unbeknownst to the user, the game also records the data from their phone's air pressure sensor,
+        This includes: touch data,
       </section>
       <section class="step">
         <div class="title"></div>
-        ...as well as the three rotational motion sensors.
+        ..air pressure data,
+      </section>
+      <section class="step">
+        <div class="title"></div>
+        ...and motion sensor data.
       </section>
       <section class="step">
         <div class="title"></div>
@@ -58,19 +63,24 @@
         I trained a <strong>windowed regression model</strong> on the air pressure signal.
         <br/><br/>
         This can then be thresholded to <strong>blindly figure out when the user taps!</strong>
-        <br/><br/>
-        That's Goal 1: accomplished!
       </section>
       <section class="step">
-        Onto Goal 2..
+        This gets us 50% of the way.
         <br/><br/>
-        Knowing this, I can then use the gyroscope data to <strong>figure out how the user taps.</strong>
+        Next, we can use the gyroscope data to <strong>figure out how the user taps.</strong>
       </section>
       <section class="step">
-        I have done this successfully in R, but I have yet to visualize the results here 😅
+        This method is able to reliably break a device PIN code after <strong>10-12 attempts</strong>!
+        <br/><br/>
+        I have done this successfully in R, but I have yet to load and visualize the results here. 😅
       </section>
       <section class="step">
         <div class="title"></div>
+        If you're worried about this side-channel, you can relax.
+        <br/><br/>
+        Google and Apple patched it around 2012.
+        <br/><br/>
+        That's the end of this story!
       </section>
     </div>
     <div id='vis'>

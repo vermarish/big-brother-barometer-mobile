@@ -592,14 +592,14 @@
       // .attr('x', width / 2)
       .attr('x', 150)
       .attr('y', (height / 3) + (height / 5))
-      .text('Everything below this is');
+      .text('');
 
       todoContainer.append('text')
       .attr('class', 'sub-title openvis-title')
       // .attr('x', width / 2)
       .attr('x', 150)
       .attr('y', (height * 2/3) - (height / 30) - 20)
-      .text('a work in progress.');
+      .text('');
   };
 
   /**
@@ -621,14 +621,15 @@
     // activateFunctions are called each
     // time the active section changes
     activateFunctions[0] = showTitle;
-    activateFunctions[1] = showTouchAndVideo;
-    activateFunctions[2] = showPressure;
-    activateFunctions[3] = showGyroscope;
-    activateFunctions[4] = focusPressure;
-    activateFunctions[5] = showTouchConfidence;
-    activateFunctions[6] = showTouchAndGyro;
-    activateFunctions[7] = showToDo;
-    
+    activateFunctions[1] = showVideo;
+    activateFunctions[2] = showTouch;
+    activateFunctions[3] = showPressure;
+    activateFunctions[4] = showGyroscope;
+    activateFunctions[5] = focusPressure;
+    activateFunctions[6] = showTouchConfidence;
+    activateFunctions[7] = showTouchAndGyro;
+    activateFunctions[8] = showToDo;
+  
 
     // updateFunctions are called while
     // in a particular section to update
@@ -674,6 +675,46 @@
       .transition()
       .attr("x", "0%")
       .delay(transition_duration);
+  }
+
+  /**
+   * shows: video
+   * hides: touch, keep-scrolling
+   */
+  function showVideo() {
+    d3.select("#keep-scrolling")
+      .transition()
+      .style("opacity", 0)
+      .duration(400);
+
+    video.style = "";
+
+    svg.select("#cover")
+      .transition()
+      .attr("x", "-80%")
+      .duration(1500);
+
+    g.select("#touchContainer")
+      .transition()
+      .attr("opacity", 0)
+      .duration(transition_duration);
+  }
+
+  /**
+   * hides: pressure graph
+   * shows: touch
+   */
+  function showTouch() {
+    g.select("#touchContainer")
+      .transition()
+      .attr("opacity", 1)
+      .duration(transition_duration);
+    
+    g.select("#pressureContainer")
+      // only need to change the opacity of the container itself
+     .transition()
+     .attr("opacity", 0)
+     .duration(transition_duration);
   }
 
   /**

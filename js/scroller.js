@@ -82,7 +82,7 @@ function scroller() {
         top = top - 200;
       }
       // sectionPositions.push(top - startPos);
-      sectionPositions.push(top - startPos + 150);
+      sectionPositions.push(top - startPos + 250);
     });
     containerStart = container.node().getBoundingClientRect().top + window.pageYOffset;
   }
