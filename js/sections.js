@@ -578,24 +578,27 @@
       .attr('width', '100%')
       .attr('height', '100%')
       .attr('fill', 'white')
-      .attr('opacity', '0.62');
+      .attr('opacity', '0.8');
 
     todoContainer.append('text')
       .attr('class', 'title openvis-title')
-      .attr('x', width / 2)
+      // .attr('x', width / 2)
+      .attr('x', 150)
       .attr('y', height / 3)
       .text('// TODO');
 
     todoContainer.append('text')
       .attr('class', 'sub-title openvis-title')
-      .attr('x', width / 2)
+      // .attr('x', width / 2)
+      .attr('x', 150)
       .attr('y', (height / 3) + (height / 5))
       .text('Everything below this is');
 
       todoContainer.append('text')
       .attr('class', 'sub-title openvis-title')
-      .attr('x', width / 2)
-      .attr('y', (height * 2/3) - (height / 30))
+      // .attr('x', width / 2)
+      .attr('x', 150)
+      .attr('y', (height * 2/3) - (height / 30) - 20)
       .text('a work in progress.');
   };
 
@@ -623,7 +626,8 @@
     activateFunctions[3] = showGyroscope;
     activateFunctions[4] = focusPressure;
     activateFunctions[5] = showTouchConfidence;
-    activateFunctions[6] = showToDo;
+    activateFunctions[6] = showTouchAndGyro;
+    activateFunctions[7] = showToDo;
     
 
     // updateFunctions are called while
@@ -689,7 +693,7 @@
     svg.select("#cover")
       .transition()
       .attr("x", "-80%")
-      .duration(3500);
+      .duration(1500);
 
     g.select("#touchContainer")
       .transition()
@@ -854,16 +858,39 @@
       .transition()
       .attr("opacity", 1)
       .duration(transition_duration);
-    
-    hideToDo();
   }
 
+  /**
+   * hides: air pressure, touch confidence
+   * shows and moves: gyroscope
+   */
+  function showTouchAndGyro() {
+    g.select("#gyroscopeOneContainer")
+      .attr("y", "20%");
 
-  function hideToDo() {
-    svg.select("#todoContainer")
+    g.select("#gyroscopeTwoContainer")
+      .attr("y", "33%");
+    
+    g.select("#gyroscopeThreeContainer")
+      .attr("y", "46%");
+    
+
+    g.selectAll("#gyroscopeOneContainer, #gyroscopeTwoContainer, #gyroscopeThreeContainer")
+      .transition()
+      .attr("opacity", 1)
+      .duration(transition_duration);
+
+      g.select("#touchConfidenceContainer")
       .transition()
       .attr("opacity", 0)
       .duration(transition_duration);
+
+      g.select("#pressureContainer")
+        .transition()
+        .attr("opacity", 0)
+        .duration(transition_duration);
+
+    hideToDo();
   }
 
   function showToDo() {
@@ -873,6 +900,15 @@
       .attr("opacity", 1)
       .duration(transition_duration);
   }
+
+  function hideToDo() {
+    svg.select("#todoContainer")
+      .transition()
+      .attr("opacity", 0)
+      .duration(transition_duration);
+  }
+
+  
   
   /**
    * Whatever time the video's at, set the whole canvas to that time.

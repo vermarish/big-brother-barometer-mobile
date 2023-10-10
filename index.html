@@ -54,22 +54,23 @@
         Notice how every time the user taps, there's a spike in the pressure sensor?
       </section>
       <section class="step">
-        <div class="title">Plan Of Attack</div>
-        Identifying the occurrence
-        
-        This signal can be trained with a windowed regression model 
+        <div class="title"></div>
+        I trained a <strong>windowed regression model</strong> on the air pressure signal.
+        <br/><br/>
+        This can then be thresholded to <strong>blindly figure out when the user taps!</strong>
+        <br/><br/>
+        That's Goal 1: accomplished!
       </section>
       <section class="step">
-        <div class="title">Ramping Back Up</div>
-        Unfortunately, the trend does not continue. Midway into the talk my Um's and Ah's spike. I continue to use them pretty consistently throughout the rest of the talk.
+        Onto Goal 2..
+        <br/><br/>
+        Knowing this, I can then use the gyroscope data to <strong>figure out how the user taps.</strong>
       </section>
       <section class="step">
-        <div class="title">The Cough Effect</div>
-        My theory is that at this critical halfway point in my talk, I heard a dry cough indicative of the audience's waning interest. This caused self-confidence to collapse and forced me out of my groove.<br/><br/>A competing theory is that I just hadn't practiced the last half of my speech as much.
+        I have done this successfully in R, but I have yet to visualize the results here 😅
       </section>
       <section class="step">
-        <div class="title">Best of Luck to Me in 2015</div>
-        The world may never know, or care, but hopefully these insights improve my speaking in 2015. Though preliminary results aren't looking so good.
+        <div class="title"></div>
       </section>
     </div>
     <div id='vis'>

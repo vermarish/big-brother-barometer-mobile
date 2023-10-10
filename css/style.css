@@ -62,7 +62,7 @@
 }
 
 #vis .title {
-  font-size:5em;
+  font-size:3.5em;
   text-anchor: middle;
   opacity: 0.5;
   fill: rgb(0, 115, 255);
@@ -70,7 +70,7 @@
 }
 
 #vis .sub-title {
-  font-size:3em;
+  font-size:2em;
   text-anchor: middle;
   opacity: 0.5;
 }
